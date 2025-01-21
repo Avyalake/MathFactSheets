@@ -38,7 +38,7 @@
 
         .problem {
             display: inline-block;
-            width: 150px;
+            width: 150px;  /* Fixed width for desktop */
             margin: 10px;
             padding: 10px;
             text-align: right;
@@ -189,6 +189,21 @@
                 box-shadow: none;
             }
         }
+
+        /* Update mobile media query */
+        @media screen and (max-width: 768px) {
+            .problem {
+                width: calc(33.33% - 20px);
+                min-width: calc(33.33% - 20px);
+                max-width: 150px;
+                font-size: 16px;
+            }
+
+            .problem-row {
+                justify-content: flex-start;
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -316,6 +331,18 @@
             alert(`Time's up!\n\nScore: ${correct}/${total} (${score}%)\nUnanswered: ${unanswered}`);
         }
 
+        function getProblemsPerRow() {
+            // Return exactly 5 for desktop, calculate minimum 3 for mobile
+            if (window.innerWidth > 768) {
+                return 5; // Exactly 5 for desktop
+            }
+            // Mobile logic: minimum 3 problems per row
+            const containerWidth = document.querySelector('.worksheet').offsetWidth;
+            const problemWidth = 120; // Approximate width including margins
+            const maxProblems = Math.floor(containerWidth / problemWidth);
+            return Math.max(3, maxProblems);
+        }
+
         function generateWorksheet() {
             const operation = document.getElementById('operation').value;
             const numProblems = parseInt(document.getElementById('numProblems').value);
@@ -329,8 +356,8 @@
             let answers = '<div class="answers" style="display: none;"><h3>Answers</h3><div class="problem-row">';
             
             for (let i = 0; i < numProblems; i++) {
-                // Add row break every 5 problems
-                if (i > 0 && i % 5 === 0) {
+                // Update row break logic to use getProblemsPerRow()
+                if (i > 0 && i % getProblemsPerRow() === 0) {
                     problems += '</div><div class="problem-row">';
                     answers += '</div><div class="problem-row">';
                 }
