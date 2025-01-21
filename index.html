@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Math Fact Sheets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;  /* Increased for 5 problems per row */
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .controls {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .worksheet {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center; /* Center the problems */
+        }
+
+        .problem-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 0 -10px; /* Negative margin to offset problem padding */
+        }
+
+        .problem {
+            display: inline-block;
+            width: 150px;
+            margin: 10px;
+            padding: 10px;
+            text-align: right;
+            font-size: 18px;
+            font-family: monospace;
+            vertical-align: top;
+        }
+
+        .vertical-problem {
+            display: inline-block;
+            border-bottom: 2px solid #000;
+            margin-bottom: 5px;
+            position: relative;
+            padding-left: 20px; /* Space for operator */
+        }
+
+        .operator {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .answer-line {
+            border-bottom: 1px solid #000;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .carry-line {
+            height: 15px;
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: rgb(8, 247, 247);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button.timer-btn {
+            background-color: #f804e4;
+        }
+
+        button.timer-btn:hover {
+            background-color: #f804bf;
+        }
+
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #f44336;
+        }
+
+        select, input {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        .answers {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+        }
+
+        .mode-select {
+            margin-bottom: 15px;
+        }
+
+        .timer-controls {
+            display: none;
+            margin: 10px 0;
+        }
+
+        .timer-settings {
+            display: none;
+            margin: 10px 0;
+        }
+
+        .answer-input {
+            width: 60px;
+            text-align: right;
+            font-family: monospace;
+            font-size: 18px;
+            margin-top: 5px;
+            padding: 2px 5px;
+        }
+
+        .correct {
+            background-color: #deffde;
+            border: 1px solid #4CAF50;
+        }
+
+        .incorrect {
+            background-color: #ffe6e6;
+            border: 1px solid #36b8f4;
+        }
+
+        .check-answer-btn {
+            display: block;
+            margin: 10px auto;
+            background-color: #fb03e7;
+            color: rgb(217, 0, 255);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        @media print {
+            .controls {
+                display: none;
+            }
+            .worksheet {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h1>Math Fact Sheet Generator</h1>
+        
+        <div class="mode-select">
+            <label for="mode">Mode:</label>
+            <select id="mode" onchange="toggleMode()">
+                <option value="untimed">Untimed Practice</option>
+                <option value="timed">Timed Practice</option>
+            </select>
+        </div>
+
+        <div class="timer-settings">
+            <label for="timeLimit">Time Limit:</label>
+            <input type="number" id="timeLimitMinutes" value="5" min="0" max="60" style="width: 60px;"> minutes
+            <input type="number" id="timeLimitSeconds" value="0" min="0" max="30" step="30" style="width: 60px;"> seconds
+        </div>
+
+        <div>
+            <label for="operation">Operation:</label>
+            <select id="operation">
+                <option value="addition">Addition</option>
+                <option value="subtraction">Subtraction</option>
+                <option value="multiplication">Multiplication</option>
+                <option value="division">Division</option>
+            </select>
+
+            <label for="numProblems">Number of Problems:</label>
+            <input type="number" id="numProblems" value="25" min="1" max="100">
+
+            <label for="maxNumber">Maximum Number:</label>
+            <input type="number" id="maxNumber" value="12" min="1" max="999">
+        </div>
+
+        <button onclick="generateWorksheet()">Generate New Worksheet</button>
+        <button onclick="toggleAnswers()">Show/Hide Answers</button>
+        <button onclick="window.print()">Print Worksheet</button>
+        
+        <div class="timer-controls">
+            <div class="timer" id="timer">Time Remaining: 5:00</div>
+            <button class="timer-btn" onclick="startTimer()">Start Timer</button>
+            <button class="timer-btn" onclick="resetTimer()">Reset Timer</button>
+        </div>
+    </div>
+
+    <div class="worksheet" id="worksheet"></div>
+
+    <script>
+        let showAnswers = false;
+        let timerInterval;
+        let timeRemaining;
+
+        function toggleMode() {
+            const mode = document.getElementById('mode').value;
+            const timerControls = document.querySelector('.timer-controls');
+            const timerSettings = document.querySelector('.timer-settings');
+            
+            if (mode === 'timed') {
+                timerControls.style.display = 'block';
+                timerSettings.style.display = 'block';
+                resetTimer();
+            } else {
+                timerControls.style.display = 'none';
+                timerSettings.style.display = 'none';
+                clearInterval(timerInterval);
+            }
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            const minutes = parseInt(document.getElementById('timeLimitMinutes').value) || 0;
+            const seconds = parseInt(document.getElementById('timeLimitSeconds').value) || 0;
+            timeRemaining = (minutes * 60) + seconds;
+            
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time\'s up!');
+                    submitWorksheet(); // Use the submit function when time is up
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            const minutes = parseInt(document.getElementById('timeLimitMinutes').value) || 0;
+            const seconds = parseInt(document.getElementById('timeLimitSeconds').value) || 0;
+            timeRemaining = (minutes * 60) + seconds;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timer').textContent = 
+                `Time Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function checkAllAnswers() {
+            const inputs = document.querySelectorAll('.answer-input');
+            let correct = 0;
+            let total = inputs.length;
+            let unanswered = 0;
+
+            inputs.forEach(input => {
+                if (!input.value) {
+                    unanswered++;
+                } else if (parseInt(input.value) === parseInt(input.dataset.correct)) {
+                    correct++;
+                    input.classList.add('correct');
+                    input.classList.remove('incorrect');
+                } else {
+                    input.classList.add('incorrect');
+                    input.classList.remove('correct');
+                }
+            });
+
+            const score = Math.round((correct/total) * 100);
+            alert(`Time's up!\n\nScore: ${correct}/${total} (${score}%)\nUnanswered: ${unanswered}`);
+        }
+
+        function generateWorksheet() {
+            const operation = document.getElementById('operation').value;
+            const numProblems = parseInt(document.getElementById('numProblems').value);
+            const maxNumber = parseInt(document.getElementById('maxNumber').value);
+            const worksheet = document.getElementById('worksheet');
+            
+            worksheet.innerHTML = `<h2>Vertical Math Facts Worksheet</h2>
+                                 <h3>${operation.charAt(0).toUpperCase() + operation.slice(1)}</h3>`;
+            
+            let problems = '<div class="problem-row">';
+            let answers = '<div class="answers" style="display: none;"><h3>Answers</h3><div class="problem-row">';
+            
+            for (let i = 0; i < numProblems; i++) {
+                // Add row break every 5 problems
+                if (i > 0 && i % 5 === 0) {
+                    problems += '</div><div class="problem-row">';
+                    answers += '</div><div class="problem-row">';
+                }
+
+                let num1, num2;
+                
+                switch(operation) {
+                    case 'addition':
+                        num1 = Math.floor(Math.random() * maxNumber) + 1;
+                        num2 = Math.floor(Math.random() * maxNumber) + 1;
+                        break;
+                    case 'subtraction':
+                        num1 = Math.floor(Math.random() * maxNumber) + 1;
+                        num2 = Math.floor(Math.random() * num1) + 1;
+                        break;
+                    case 'multiplication':
+                        num1 = Math.floor(Math.random() * maxNumber) + 1;
+                        num2 = Math.floor(Math.random() * maxNumber) + 1;
+                        break;
+                    case 'division':
+                        num2 = Math.floor(Math.random() * (maxNumber - 1)) + 1;
+                        const quotient = Math.floor(Math.random() * maxNumber) + 1;
+                        num1 = num2 * quotient;
+                        break;
+                }
+
+                problems += generateVerticalProblem(num1, num2, operation, false, i);
+                answers += generateVerticalProblem(num1, num2, operation, true, i);
+            }
+
+            problems += '</div>';
+            answers += '</div></div>';
+
+            // Add submit button
+            const submitButton = `
+                <button onclick="submitWorksheet()" class="submit-btn" id="submit-btn">
+                    Submit Worksheet
+                </button>
+            `;
+
+            worksheet.innerHTML += problems + answers + submitButton;
+            
+            // Reset showAnswers flag and enable inputs when generating new worksheet
+            showAnswers = false;
+            
+            if (document.getElementById('mode').value === 'timed') {
+                resetTimer();
+            }
+        }
+
+        function generateVerticalProblem(num1, num2, operation, showAnswer = false, index) {
+            const num1Str = num1.toString();
+            const num2Str = num2.toString();
+            const maxLength = Math.max(num1Str.length, num2Str.length);
+            
+            const paddedNum1 = num1Str.padStart(maxLength, ' ');
+            const paddedNum2 = num2Str.padStart(maxLength, ' ');
+            
+            let symbol;
+            let answer;
+            
+            switch(operation) {
+                case 'addition':
+                    symbol = '+';
+                    answer = num1 + num2;
+                    break;
+                case 'subtraction':
+                    symbol = '−';
+                    answer = num1 - num2;
+                    break;
+                case 'multiplication':
+                    symbol = '×';
+                    answer = num1 * num2;
+                    break;
+                case 'division':
+                    symbol = '÷';
+                    answer = num1 / num2;
+                    break;
+            }
+
+            const answerStr = answer.toString().padStart(maxLength, ' ');
+            
+            return `
+                <div class="problem">
+                    <div class="carry-line">&nbsp;</div>
+                    <div class="vertical-problem">
+                        <span class="operator">${symbol}</span>
+                        <div>${paddedNum1}</div>
+                        <div>${paddedNum2}</div>
+                        <div class="answer-line"></div>
+                        ${showAnswer ? 
+                            `<div>${answerStr}</div>` : 
+                            `<input type="number" class="answer-input" 
+                                id="answer-${index}" 
+                                data-correct="${answer}" 
+                                onchange="checkAnswer(this)">`
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleAnswers() {
+            showAnswers = !showAnswers;
+            const answersDiv = document.querySelector('.answers');
+            if (answersDiv) {
+                answersDiv.style.display = showAnswers ? 'block' : 'none';
+            }
+        }
+
+        function checkAnswer(input) {
+            const correctAnswer = input.dataset.correct;
+            const userAnswer = input.value;
+            
+            if (userAnswer === correctAnswer) {
+                input.classList.add('correct');
+                input.classList.remove('incorrect');
+            } else {
+                input.classList.add('incorrect');
+                input.classList.remove('correct');
+            }
+        }
+
+        function submitWorksheet() {
+            // Stop the timer if it's running
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            // Calculate time used (only for timed mode)
+            let timeUsedMessage = '';
+            if (document.getElementById('mode').value === 'timed') {
+                const minutes = parseInt(document.getElementById('timeLimitMinutes').value) || 0;
+                const seconds = parseInt(document.getElementById('timeLimitSeconds').value) || 0;
+                const totalStartSeconds = (minutes * 60) + seconds;
+                const timeUsed = totalStartSeconds - timeRemaining;
+                const minutesUsed = Math.floor(timeUsed / 60);
+                const secondsUsed = timeUsed % 60;
+                timeUsedMessage = `Time used: ${minutesUsed}:${secondsUsed.toString().padStart(2, '0')}\n\n`;
+            }
+
+            // Check all answers
+            const inputs = document.querySelectorAll('.answer-input');
+            let correct = 0;
+            let total = inputs.length;
+            let unanswered = 0;
+
+            inputs.forEach(input => {
+                if (!input.value) {
+                    unanswered++;
+                } else if (parseInt(input.value) === parseInt(input.dataset.correct)) {
+                    correct++;
+                    input.classList.add('correct');
+                    input.classList.remove('incorrect');
+                } else {
+                    input.classList.add('incorrect');
+                    input.classList.remove('correct');
+                }
+                // Disable input after submission
+                input.disabled = true;
+            });
+
+            const score = Math.round((correct/total) * 100);
+            alert(`${timeUsedMessage}Score: ${correct}/${total} (${score}%)\nUnanswered: ${unanswered}`);
+
+            // Show answers
+            showAnswers = true;
+            const answersDiv = document.querySelector('.answers');
+            if (answersDiv) {
+                answersDiv.style.display = 'block';
+            }
+
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Generate initial worksheet
+        generateWorksheet();
+    </script>
+</body>
+</html> 
